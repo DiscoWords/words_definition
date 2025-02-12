@@ -4,90 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Definitions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
-            font-family: "Times New Roman", Times, serif;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: "Times New Roman", serif;
             text-align: center;
-            margin: 0;
-            padding: 0;
+            margin: 40px;
+            background-color: #f5f5f5;
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
         }
 
-        h1 {
-            margin-top: 30px;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        #word-list {
+        .word-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
-            padding: 0 20px;
         }
 
         .word {
-            padding: 10px;
-            margin: 10px 0;
-            background-color: transparent; /* برداشتن کادر */
-            box-shadow: none; /* برداشتن سایه */
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px; /* کوچک‌تر کردن فونت */
-            max-width: 80%; /* فاصله از حواشی */
-            word-wrap: break-word;
+            margin: 8px 0;
+            transition: color 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeWord 0.6s ease-in-out forwards;
         }
 
-        .word:hover {
-            background-color: #f0f0f0;
+        @keyframes fadeWord {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .definition {
+            font-size: 16px;
+            font-style: italic;
+            color: #333;
             display: none;
-            padding-top: 10px;
-            color: #555;
+            margin-top: 5px;
+            max-width: 80%;
+            line-height: 1.4;
+            animation: fadeInDefinition 0.3s ease-in-out;
         }
 
-        .word.active .definition {
-            display: block;
+        @keyframes fadeInDefinition {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
+
     <h1>Word Definitions</h1>
-    <div id="word-list"></div>
+    <div class="word-container" id="wordContainer"></div>
 
     <script>
-        // لینک جدید برای فایل CSV شما
-        fetch('https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/word_definitions.csv')
-            .then(response => response.text())
+        // URL فایل اکسل از گیت‌هاب
+        const fileUrl = "https://raw.githubusercontent.com/YourUserName/YourRepoName/main/longman_definitions.xlsx";
+
+        fetch(fileUrl)
+            .then(response => response.arrayBuffer())
             .then(data => {
-                const rows = data.split("\n");
-                const wordList = document.getElementById("word-list");
-                
-                rows.forEach((row, index) => {
-                    if (row.trim() !== "") {  // جلوگیری از ردیف‌های خالی
-                        // جدا کردن کلمه و معنی فقط از اولین کاما
-                        const [word, ...definitionParts] = row.split(",");
-                        const definition = definitionParts.join(",").trim();  // بازگشت کاماهای بعدی به معنی
+                const workbook = XLSX.read(data, { type: "array" });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                const wordContainer = document.getElementById("wordContainer");
+                wordContainer.innerHTML = "";
+
+                rows.forEach(row => {
+                    if (row.length >= 2) {
+                        const word = row[0].trim();
+                        const definition = row[1].trim();
+
+                        const wordElement = document.createElement("div");
+                        wordElement.classList.add("word");
+                        wordElement.textContent = word;
                         
-                        const wordDiv = document.createElement("div");
-                        wordDiv.classList.add("word");
-                        wordDiv.innerHTML = `
-                            <h2>${word}</h2>
-                            <p class="definition">${definition}</p>
-                        `;
-                        
-                        wordDiv.addEventListener("click", () => {
-                            wordDiv.classList.toggle("active");
+                        const definitionElement = document.createElement("div");
+                        definitionElement.classList.add("definition");
+                        definitionElement.textContent = definition;
+
+                        wordElement.addEventListener("click", function() {
+                            if (definitionElement.style.display === "none" || definitionElement.style.display === "") {
+                                definitionElement.style.display = "block";
+                            } else {
+                                definitionElement.style.display = "none";
+                            }
                         });
 
-                        wordList.appendChild(wordDiv);
+                        wordContainer.appendChild(wordElement);
+                        wordContainer.appendChild(definitionElement);
                     }
                 });
             })
             .catch(error => {
-                console.error("Error loading CSV:", error);
+                console.error("Error loading Excel file:", error);
             });
+
+        document.addEventListener("scroll", function() {
+            const words = document.querySelectorAll(".word");
+            words.forEach(word => {
+                const position = word.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+
+                if (position < windowHeight - 50) {
+                    word.style.animation = "fadeWord 0.6s ease-in-out forwards";
+                }
+            });
+        });
     </script>
 </body>
 </html>
