@@ -9,22 +9,36 @@
             font-family: "Times New Roman", Times, serif;
             background-color: #f4f4f9;
             color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 30px;
+        }
+
+        #word-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 20px;
         }
 
         .word {
             padding: 10px;
-            margin-bottom: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            background-color: transparent; /* برداشتن کادر */
+            box-shadow: none; /* برداشتن سایه */
             cursor: pointer;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            font-size: 16px; /* کوچک‌تر کردن فونت */
+            max-width: 80%; /* فاصله از حواشی */
+            word-wrap: break-word;
         }
 
         .word:hover {
             background-color: #f0f0f0;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
 
         .definition {
@@ -52,7 +66,9 @@
                 
                 rows.forEach((row, index) => {
                     if (row.trim() !== "") {  // جلوگیری از ردیف‌های خالی
-                        const [word, definition] = row.split(",");
+                        // جدا کردن کلمه و معنی فقط از اولین کاما
+                        const [word, ...definitionParts] = row.split(",");
+                        const definition = definitionParts.join(",").trim();  // بازگشت کاماهای بعدی به معنی
                         
                         const wordDiv = document.createElement("div");
                         wordDiv.classList.add("word");
