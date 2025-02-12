@@ -4,111 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Definitions</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            padding: 20px;
+            font-family: "Times New Roman", Times, serif;
+            background-color: #f4f4f9;
+            color: #333;
         }
 
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 12px;
+        .word {
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .card:hover {
-            transform: scale(1.05);
+        .word:hover {
+            background-color: #f0f0f0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
 
         .definition {
             display: none;
-            margin-top: 10px;
-            font-size: 16px;
-            color: #333;
-            transition: max-height 0.5s ease-in-out;
-            max-height: 0;
-            overflow: hidden;
+            padding-top: 10px;
+            color: #555;
         }
 
-        .definition.show {
+        .word.active .definition {
             display: block;
-            max-height: 1000px;
-        }
-
-        .loading {
-            text-align: center;
-            font-size: 18px;
-            color: #666;
         }
     </style>
 </head>
 <body>
-
-    <h1 class="text-3xl font-semibold text-center mb-6">Word Definitions</h1>
-
-    <div id="words-container">
-        <div class="loading">Loading words...</div>
-    </div>
+    <h1>Word Definitions</h1>
+    <div id="word-list"></div>
 
     <script>
-        // Function to read the CSV and display words and their definitions
-        function loadCSV() {
-            fetch('C:\Users\dell\Downloads\New folder\word_definitions.csv')  // Adjust the path to your CSV file
-                .then(response => response.text())
-                .then(data => {
-                    const words = parseCSV(data);
-                    displayWords(words);
-                })
-                .catch(error => console.error('Error loading CSV:', error));
-        }
+        // لینک جدید برای فایل CSV شما
+        fetch('https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/word_definitions.csv')
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.split("\n");
+                const wordList = document.getElementById("word-list");
+                
+                rows.forEach((row, index) => {
+                    if (row.trim() !== "") {  // جلوگیری از ردیف‌های خالی
+                        const [word, definition] = row.split(",");
+                        
+                        const wordDiv = document.createElement("div");
+                        wordDiv.classList.add("word");
+                        wordDiv.innerHTML = `
+                            <h2>${word}</h2>
+                            <p class="definition">${definition}</p>
+                        `;
+                        
+                        wordDiv.addEventListener("click", () => {
+                            wordDiv.classList.toggle("active");
+                        });
 
-        // Function to parse CSV data into a usable array
-        function parseCSV(data) {
-            const lines = data.split('\n');
-            const words = lines.map(line => {
-                const [word, definition] = line.split(',');
-                return { word: word.trim(), definition: definition.trim() };
-            });
-            return words;
-        }
-
-        // Function to display the words in a card layout
-        function displayWords(words) {
-            const container = document.getElementById('words-container');
-            container.innerHTML = '';  // Clear the loading message
-
-            words.forEach(({ word, definition }) => {
-                const card = document.createElement('div');
-                card.classList.add('card');
-
-                const wordElement = document.createElement('div');
-                wordElement.classList.add('text-xl', 'font-semibold');
-                wordElement.textContent = word;
-
-                const definitionElement = document.createElement('div');
-                definitionElement.classList.add('definition');
-                definitionElement.textContent = definition;
-
-                card.appendChild(wordElement);
-                card.appendChild(definitionElement);
-
-                card.addEventListener('click', () => {
-                    definitionElement.classList.toggle('show');
+                        wordList.appendChild(wordDiv);
+                    }
                 });
-
-                container.appendChild(card);
+            })
+            .catch(error => {
+                console.error("Error loading CSV:", error);
             });
-        }
-
-        // Load the CSV when the page loads
-        window.onload = loadCSV;
     </script>
-
 </body>
 </html>
