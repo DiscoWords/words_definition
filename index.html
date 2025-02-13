@@ -20,6 +20,33 @@
             to { opacity: 1; }
         }
 
+        /* استایل برای صفحه اصلی */
+        .start-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .start-option {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px 30px;
+            cursor: pointer;
+            background-color: #3b3b3b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .start-option:hover {
+            background-color: #555;
+        }
+
+        /* استایل برای صفحه و بخش‌ها */
         .word-container {
             display: flex;
             flex-direction: column;
@@ -31,7 +58,7 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            margin: 5px 0; /* فاصله‌ی کمتر بین کلمات */
+            margin: 5px 0;
             transition: color 0.3s ease-in-out;
             opacity: 0;
             transform: translateY(10px);
@@ -54,7 +81,7 @@
             font-style: italic;
             color: #333;
             display: none;
-            margin-top: 2px; /* کاهش فاصله‌ی بین کلمه و معنی */
+            margin-top: 2px;
             max-width: 80%;
             line-height: 1.4;
             animation: fadeInDefinition 0.3s ease-in-out;
@@ -64,68 +91,107 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* انیمیشن fade برای بخش‌ها */
+        .fade {
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>Word Definitions</h1>
-    <div class="word-container" id="wordContainer"></div>
+    <div id="startPage" class="start-container">
+        <button class="start-option" id="wordDefinitionsBtn">Word Definitions</button>
+        <button class="start-option" id="discoStoriesBtn">Disco Stories</button>
+    </div>
+
+    <div id="contentPage" class="fade" style="display: none;">
+        <h1 id="pageTitle"></h1>
+        <div class="word-container" id="wordContainer"></div>
+        <button class="start-option" id="backBtn" style="margin-top: 20px;">Back</button>
+    </div>
 
     <script>
-        // URL فایل اکسل از گیت‌هاب
-        const fileUrl = "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx";
+        const wordDefinitionsBtn = document.getElementById('wordDefinitionsBtn');
+        const discoStoriesBtn = document.getElementById('discoStoriesBtn');
+        const startPage = document.getElementById('startPage');
+        const contentPage = document.getElementById('contentPage');
+        const wordContainer = document.getElementById('wordContainer');
+        const pageTitle = document.getElementById('pageTitle');
+        const backBtn = document.getElementById('backBtn');
 
-        fetch(fileUrl)
-            .then(response => response.arrayBuffer())
-            .then(data => {
-                const workbook = XLSX.read(data, { type: "array" });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        const fileUrls = {
+            wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
+            discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx"
+        };
 
-                const wordContainer = document.getElementById("wordContainer");
-                wordContainer.innerHTML = "";
-
-                rows.forEach(row => {
-                    if (row.length >= 2) {
-                        const word = row[0].trim();
-                        const definition = row[1].trim();
-
-                        const wordElement = document.createElement("div");
-                        wordElement.classList.add("word");
-                        wordElement.textContent = word;
-                        
-                        const definitionElement = document.createElement("div");
-                        definitionElement.classList.add("definition");
-                        definitionElement.textContent = definition;
-
-                        wordElement.addEventListener("click", function() {
-                            if (definitionElement.style.display === "none" || definitionElement.style.display === "") {
-                                definitionElement.style.display = "block";
-                            } else {
-                                definitionElement.style.display = "none";
-                            }
-                        });
-
-                        wordContainer.appendChild(wordElement);
-                        wordContainer.appendChild(definitionElement);
-                    }
-                });
-            })
-            .catch(error => {
-                console.error("Error loading Excel file:", error);
-            });
-
-        document.addEventListener("scroll", function() {
-            const words = document.querySelectorAll(".word");
-            words.forEach(word => {
-                const position = word.getBoundingClientRect().top;
-                const windowHeight = window.innerHeight;
-
-                if (position < windowHeight - 50) {
-                    word.style.animation = "fadeWord 0.6s ease-in-out forwards";
-                }
-            });
+        // وقتی دکمه Word Definitions کلیک می‌شود
+        wordDefinitionsBtn.addEventListener("click", function() {
+            loadPage("Word Definitions", fileUrls.wordDefinitions);
         });
+
+        // وقتی دکمه Disco Stories کلیک می‌شود
+        discoStoriesBtn.addEventListener("click", function() {
+            loadPage("Disco Stories", fileUrls.discoStories);
+        });
+
+        // وقتی دکمه Back کلیک می‌شود
+        backBtn.addEventListener("click", function() {
+            startPage.style.display = "flex";
+            contentPage.style.display = "none";
+        });
+
+        // بارگذاری صفحه و داده‌ها
+        function loadPage(pageName, fileUrl) {
+            startPage.style.display = "none";
+            contentPage.style.display = "block";
+            pageTitle.textContent = pageName;
+            loadExcelData(fileUrl);
+        }
+
+        // بارگذاری فایل اکسل
+        function loadExcelData(fileUrl) {
+            fetch(fileUrl)
+                .then(response => response.arrayBuffer())
+                .then(data => {
+                    const workbook = XLSX.read(data, { type: "array" });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    wordContainer.innerHTML = ""; // پاک کردن داده‌های قبلی
+
+                    rows.forEach(row => {
+                        if (row.length >= 2) {
+                            const word = row[0].trim();
+                            const definition = row[1].trim();
+
+                            const wordElement = document.createElement("div");
+                            wordElement.classList.add("word");
+                            wordElement.textContent = word;
+                            
+                            const definitionElement = document.createElement("div");
+                            definitionElement.classList.add("definition");
+                            definitionElement.textContent = definition;
+
+                            wordElement.addEventListener("click", function() {
+                                if (definitionElement.style.display === "none" || definitionElement.style.display === "") {
+                                    definitionElement.style.display = "block";
+                                } else {
+                                    definitionElement.style.display = "none";
+                                }
+                            });
+
+                            wordContainer.appendChild(wordElement);
+                            wordContainer.appendChild(definitionElement);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error loading Excel file:", error);
+                });
+        }
     </script>
+
 </body>
 </html>
