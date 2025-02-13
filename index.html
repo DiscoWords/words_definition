@@ -30,14 +30,14 @@
         }
 
         .start-option {
-            font-size: 24px;
+            font-size: 30px; /* فونت بزرگتر */
             font-weight: bold;
-            margin: 20px 0;
-            padding: 15px 30px;
+            margin: 10px 0; /* فاصله کمتر */
+            padding: 20px 40px; /* سایز بزرگتر */
             cursor: pointer;
             background-color: #3b3b3b;
             color: white;
-            border: none;
+            border: none; /* حذف کادر دور */
             border-radius: 8px;
             transition: background-color 0.3s;
         }
@@ -109,7 +109,6 @@
     <div id="contentPage" class="fade" style="display: none;">
         <h1 id="pageTitle"></h1>
         <div class="word-container" id="wordContainer"></div>
-        <button class="start-option" id="backBtn" style="margin-top: 20px;">Back</button>
     </div>
 
     <script>
@@ -119,7 +118,6 @@
         const contentPage = document.getElementById('contentPage');
         const wordContainer = document.getElementById('wordContainer');
         const pageTitle = document.getElementById('pageTitle');
-        const backBtn = document.getElementById('backBtn');
 
         const fileUrls = {
             wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
@@ -134,12 +132,6 @@
         // وقتی دکمه Disco Stories کلیک می‌شود
         discoStoriesBtn.addEventListener("click", function() {
             loadPage("Disco Stories", fileUrls.discoStories);
-        });
-
-        // وقتی دکمه Back کلیک می‌شود
-        backBtn.addEventListener("click", function() {
-            startPage.style.display = "flex";
-            contentPage.style.display = "none";
         });
 
         // بارگذاری صفحه و داده‌ها
