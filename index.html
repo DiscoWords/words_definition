@@ -10,17 +10,19 @@
         font-family: "Times New Roman", serif;
         margin: 0;
         padding: 0;
-        background-color: #121212;
+        background-color: #080808;
         color: #f5f5f5;
         opacity: 0;
         animation: fadeIn 1s ease-in forwards;
         position: relative;
-        overflow: hidden; /* Prevent body scroll */
+        overflow-x: hidden;
     }
 
-    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
 
-    /* Animated Background */
     .background-blurs {
         position: fixed;
         top: 0; left: 0;
@@ -33,15 +35,16 @@
         position: absolute;
         border-radius: 50%;
         filter: blur(140px);
-        opacity: 0.25; /* کاهش شفافیت برای تیره‌تر شدن */
+        opacity: 0.38;
     }
+
     body::after {
         content: "";
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAARlJREFUaIHt1M0NwjAUBlAb6Cg6gI7gGjlCB3AFHdABdBRHcAR0AFUoRAxJ/158fUmKZH6S/N329gQAgG83AAB/xYBSAAAAYQlIAABYSJAAAACwECQBAAAWEiQAAACsBEgAAFgIkQAAALASIIE/YUECBDaCAgQ2igIEPsICBD6CAgQ+igIE/oYFCGwEBQhsFAUI/AwLEPgMCxD4DAoQ+BkWIHATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQgsBEUILA5FAAAgF8CegB75sHyJpAAAAAElFTkSuQmCC');
-        opacity: 0.05;
+        opacity: 0.08;
         z-index: -1;
     }
 
@@ -58,26 +61,21 @@
         100% {transform: translate(60%, -50%) scale(1.1);}
     }
 
-    /* Pages */
     .page-container {
-        display: none; /* Hide all pages by default */
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         padding: 40px;
         box-sizing: border-box;
-    }
-    .page-container.active {
-        display: flex; /* Show only the active page */
-    }
-    /* ** FIX FOR SCROLLING ** */
-    .page-container.scrollable {
-        justify-content: flex-start; /* Align to top to allow scrolling */
-        overflow-y: auto;
+        width: 100%;
     }
 
-    /* Buttons */
+    .scrollable {
+        justify-content: flex-start;
+    }
+
     .start-option {
         font-family: "Times New Roman", serif;
         font-size: 26px;
@@ -85,16 +83,15 @@
         margin: 12px 0;
         padding: 18px 36px;
         cursor: pointer;
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.08);
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 12px;
         transition: background-color 0.3s, transform 0.2s;
         width: 300px;
-        text-align: center;
     }
     .start-option:hover {
-        background-color: rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.18);
         transform: scale(1.03);
     }
 
@@ -102,9 +99,282 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 15px;
-        width: 100%;
+        width: 80%;
         max-width: 800px;
         margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    .unit-option {
+        font-size: 16px;
+        padding: 15px;
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    .unit-option:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .word-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 0 20px;
+        width: 100%;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.3) transparent;
+    }
+    .word-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    .word-container::-webkit-scrollbar-thumb {
+        background-color: rgba(255,255,255,0.3);
+        border-radius: 3px;
+    }
+
+    .word {
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 8px 0;
+        transition: color 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeWord 0.6s ease-in-out forwards;
+    }
+    @keyframes fadeWord {
+        from {opacity: 0; transform: translateY(10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    .definition {
+        font-size: 18px;
+        font-style: italic;
+        color: #ccc;
+        display: none;
+        margin-top: 4px;
+        max-width: 80%;
+        line-height: 1.5;
+        animation: fadeInDefinition 0.3s ease-in-out;
+    }
+    @keyframes fadeInDefinition {
+        from {opacity: 0; transform: translateY(-5px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+
+    h1 {
+        font-size: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 16px;
+        padding: 8px 16px;
+        background-color: rgba(255, 255, 255, 0.08);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .back-btn:hover {
+        background-color: rgba(255, 255, 255, 0.18);
+    }
+</style>
+</head>
+<body>
+
+<div class="background-blurs">
+    <div class="blur-circle circle1"></div>
+    <div class="blur-circle circle2"></div>
+    <div class="blur-circle circle3"></div>
+</div>
+
+<div id="preStartPage" class="page-container">
+    <button class="start-option" id="discoBtn">Disco</button>
+    <button class="start-option" id="cambridgeBtn">Cambridge</button>
+</div>
+
+<div id="startPage" class="page-container" style="display: none;">
+    <button class="back-btn" data-target="preStartPage">Back</button>
+    <button class="start-option" id="wordDefinitionsBtn">Word Definitions</button>
+    <button class="start-option" id="discoStoriesBtn">Disco Stories</button>
+</div>
+
+<div id="cambridgePage" class="page-container scrollable" style="display: none;">
+    <button class="back-btn" data-target="preStartPage">Back</button>
+    <h1>Cambridge Units</h1>
+    <div class="unit-grid" id="unitGridContainer"></div>
+</div>
+
+<div id="contentPage" class="page-container" style="display: none;">
+    <button class="back-btn" id="contentBackBtn">Back</button>
+    <h1 id="pageTitle"></h1>
+    <div class="word-container" id="wordContainer"></div>
+</div>
+
+<script>
+const pages = {
+    preStartPage: document.getElementById('preStartPage'),
+    startPage: document.getElementById('startPage'),
+    cambridgePage: document.getElementById('cambridgePage'),
+    contentPage: document.getElementById('contentPage')
+};
+
+const discoBtn = document.getElementById('discoBtn');
+const cambridgeBtn = document.getElementById('cambridgeBtn');
+const wordDefinitionsBtn = document.getElementById('wordDefinitionsBtn');
+const discoStoriesBtn = document.getElementById('discoStoriesBtn');
+
+const unitGridContainer = document.getElementById('unitGridContainer');
+const wordContainer = document.getElementById('wordContainer');
+const pageTitle = document.getElementById('pageTitle');
+const contentBackBtn = document.getElementById('contentBackBtn');
+
+let lastPageBeforeContent = 'preStartPage';
+
+const fileUrls = {
+    wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
+    discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx",
+    cambridgeBaseUrl: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/"
+};
+
+function showPage(pageId){
+    if(!pages[pageId]) return;
+    Object.values(pages).forEach(page => page.style.display = 'none');
+    pages[pageId].style.display = 'flex';
+}
+
+discoBtn.addEventListener('click', () => {
+    lastPageBeforeContent = 'startPage';
+    showPage('startPage');
+});
+
+cambridgeBtn.addEventListener('click', () => {
+    lastPageBeforeContent = 'cambridgePage';
+    showPage('cambridgePage');
+});
+
+document.querySelectorAll('.back-btn[data-target]').forEach(btn => {
+    btn.addEventListener('click', (event) => {
+        const targetPage = event.currentTarget.dataset.target;
+        if (targetPage && pages[targetPage]) {
+            showPage(targetPage);
+        }
+    });
+});
+
+contentBackBtn.addEventListener('click', () => {
+    showPage(lastPageBeforeContent);
+});
+
+function generateCambridgeUnits(){
+    for(let i = 1; i <= 22; i++){
+        const unitBtn = document.createElement('button');
+        unitBtn.className = 'unit-option';
+        unitBtn.textContent = `Unit ${i}`;
+        unitBtn.addEventListener('click', () => {
+            lastPageBeforeContent = 'cambridgePage';
+            const fileUrl = `${fileUrls.cambridgeBaseUrl}Unit_${i}.xlsx`;
+            loadPage(`Unit ${i}`, fileUrl);
+        });
+        unitGridContainer.appendChild(unitBtn);
+    }
+}
+
+wordDefinitionsBtn.addEventListener('click', () => {
+    lastPageBeforeContent = 'startPage';
+    loadPage("Word Definitions", fileUrls.wordDefinitions);
+});
+
+discoStoriesBtn.addEventListener('click', () => {
+    lastPageBeforeContent = 'startPage';
+    loadPage("Disco Stories", fileUrls.discoStories);
+});
+
+function loadPage(name, url){
+    showPage('contentPage');
+    pageTitle.textContent = name;
+    loadExcelData(url);
+}
+
+function loadExcelData(fileUrl){
+    wordContainer.innerHTML = "<h1>Loading...</h1>";
+    fetch(fileUrl)
+        .then(res => {
+            if(!res.ok) throw new Error(`Error ${res.status}`);
+            return res.arrayBuffer();
+        })
+        .then(data => {
+            const workbook = XLSX.read(data, {type: "array"});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+            wordContainer.innerHTML = "";
+            rows.forEach((row, index) => {
+                if(row && row.length >= 2){
+                    const word = String(row[0] || "").trim();
+                    const def = String(row[1] || "").trim();
+                    if(word && def){
+                        const wEl = document.createElement("div");
+                        wEl.className = "word";
+                        wEl.textContent = word;
+                        wEl.style.animationDelay = `${index * 0.05}s`;
+
+                        const dEl = document.createElement("div");
+                        dEl.className = "definition";
+                        dEl.innerHTML = def.replace(/\n/g, "<br>");
+
+                        wEl.addEventListener("click", () => {
+                            dEl.style.display = (dEl.style.display === "none" || !dEl.style.display) ? "block" : "none";
+                        });
+
+                        wordContainer.appendChild(wEl);
+                        wordContainer.appendChild(dEl);
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            wordContainer.innerHTML = `<h1>Error</h1><p>${err.message}</p>`;
+        });
+}
+
+function setRandomCircleColors(){
+    const palettes = [
+        ["#ff4d4d","#ff944d","#ffd24d"],
+        ["#4dafff","#4d94ff","#4dd2ff"],
+        ["#bb4dff","#944dff","#d24dff"],
+        ["#4dff88","#4dffc2","#4dfff5"]
+    ];
+    const palette = palettes[Math.floor(Math.random() * palettes.length)];
+    const circles = document.querySelectorAll('.blur-circle');
+    circles[0].style.background = palette[0];
+    circles[1].style.background = palette[1];
+    circles[2].style.background = palette[2];
+    circles[0].style.width = "600px"; circles[0].style.height = "600px";
+    circles[1].style.width = "500px"; circles[1].style.height = "500px";
+    circles[2].style.width = "400px"; circles[2].style.height = "400px";
+    circles[0].style.animation = "move-circle1 25s infinite alternate";
+    circles[1].style.animation = "move-circle2 30s infinite alternate";
+    circles[2].style.animation = "move-circle3 20s infinite alternate";
+}
+
+generateCambridgeUnits();
+showPage('preStartPage');
+setRandomCircleColors();
+</script>
+</body>
+</html>
     }
     .unit-option {
         font-size: 16px;
@@ -780,5 +1050,6 @@ setRandomCircleColors();
 
 </body>
 </html>
+
 
 
