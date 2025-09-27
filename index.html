@@ -9,56 +9,157 @@
         body {
             font-family: "Times New Roman", serif;
             text-align: center;
-            margin: 40px;
-            background-color: #f5f5f5;
+            margin: 0;
+            padding: 40px;
+            background-color: #121212; /* بک‌گراند دارک */
+            color: #f5f5f5;
             opacity: 0;
             animation: fadeIn 1s ease-in forwards;
+            overflow: hidden; /* جلوگیری از اسکرول به خاطر دایره‌ها */
+            position: relative;
         }
 
+        /* --- NEW: Animated Background --- */
+        .background-blurs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .blur-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px); /* تاری بسیار زیاد */
+            opacity: 0.4;
+        }
+
+        .circle1 {
+            width: 500px;
+            height: 500px;
+            background: #ff4d4d;
+            animation: move-circle1 25s infinite alternate;
+        }
+
+        .circle2 {
+            width: 400px;
+            height: 400px;
+            background: #4d94ff;
+            animation: move-circle2 30s infinite alternate;
+        }
+        
+        .circle3 {
+            width: 300px;
+            height: 300px;
+            background: #4dff88;
+            animation: move-circle3 20s infinite alternate;
+        }
+        
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAARlJREFUaIHt1M0NwjAUBlAb6Cg6gI7gGjlCB3AFHdABdBRHcAR0AFUoRAxJ/158fUmKZH6S/N329gQAgG83AAB/xYBSAAAAYQlIAABYSJAAAACwECQBAAAWEiQAAACsBEgAAFgIkQAAALASIIE/YUECBDaCAgQ2igIEPsICBD6CAgQ+igIE/oYFCGwEBQhsFAUI/AwLEPgMCxD4DAoQ+BkWIHATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQgsBEUILA5FAAAgF8CegB75sHyJpAAAAAElFTkSuQmCC');
+            opacity: 0.05; /* نویز بسیار کم */
+            z-index: -1;
+        }
+
+        @keyframes move-circle1 {
+            0% { transform: translate(-20%, -20%) scale(1); }
+            100% { transform: translate(80%, 60%) scale(1.2); }
+        }
+
+        @keyframes move-circle2 {
+            0% { transform: translate(70%, 20%) scale(1); }
+            100% { transform: translate(-30%, -40%) scale(0.8); }
+        }
+        
+        @keyframes move-circle3 {
+            0% { transform: translate(20%, 70%) scale(0.9); }
+            100% { transform: translate(60%, -50%) scale(1.1); }
+        }
+        /* --- End of Animated Background --- */
+        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
-        /* استایل برای صفحه اصلی */
-        .start-container {
+        .page-container {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: calc(100vh - 80px); /* 100vh minus body padding */
         }
-
+        
         .start-option {
-            font-size: 30px; /* فونت بزرگتر */
+            font-family: "Times New Roman", serif; /* فونت اصلاح شده */
+            font-size: 28px;
             font-weight: bold;
-            margin: 10px 0; /* فاصله کمتر */
-            padding: 20px 40px; /* سایز بزرگتر */
+            margin: 12px 0;
+            padding: 18px 36px;
             cursor: pointer;
-            background-color: #3b3b3b;
+            background-color: rgba(255, 255, 255, 0.1); /* روشن‌تر و شفاف */
             color: white;
-            border: none; /* حذف کادر دور */
-            border-radius: 8px;
-            transition: background-color 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px; /* انحنای گوشه‌ها */
+            transition: background-color 0.3s, transform 0.2s;
+            width: 300px;
         }
 
         .start-option:hover {
-            background-color: #555;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.03);
         }
 
-        /* استایل برای صفحه و بخش‌ها */
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            width: 80%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .unit-option {
+            font-family: sans-serif; /* فونت ساده‌تر برای یونیت‌ها */
+            font-size: 16px;
+            padding: 15px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .unit-option:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
         .word-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 0 20px;
         }
 
         .word {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            margin: 5px 0;
+            margin: 8px 0;
             transition: color 0.3s ease-in-out;
             opacity: 0;
             transform: translateY(10px);
@@ -66,24 +167,18 @@
         }
 
         @keyframes fadeWord {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .definition {
-            font-size: 16px;
+            font-size: 18px;
             font-style: italic;
-            color: #333;
+            color: #ccc;
             display: none;
-            margin-top: 2px;
+            margin-top: 4px;
             max-width: 80%;
-            line-height: 1.4;
+            line-height: 1.5;
             animation: fadeInDefinition 0.3s ease-in-out;
         }
 
@@ -91,98 +186,209 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        /* انیمیشن fade برای بخش‌ها */
+        
         .fade {
             animation: fadeIn 1s ease-in-out forwards;
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 16px;
+            padding: 8px 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
     </style>
 </head>
 <body>
+    
+    <div class="background-blurs">
+        <div class="blur-circle circle1"></div>
+        <div class="blur-circle circle2"></div>
+        <div class="blur-circle circle3"></div>
+    </div>
 
-    <div id="startPage" class="start-container">
+    <!-- NEW: Pre-Start Page -->
+    <div id="preStartPage" class="page-container">
+        <button class="start-option" id="discoBtn">Disco</button>
+        <button class="start-option" id="cambridgeBtn">Cambridge</button>
+    </div>
+
+    <div id="startPage" class="page-container" style="display: none;">
+        <button class="back-btn" data-target="preStartPage">Back</button>
         <button class="start-option" id="wordDefinitionsBtn">Word Definitions</button>
         <button class="start-option" id="discoStoriesBtn">Disco Stories</button>
     </div>
+    
+    <!-- NEW: Cambridge Units Page -->
+    <div id="cambridgePage" class="page-container" style="display: none;">
+        <button class="back-btn" data-target="preStartPage">Back</button>
+        <h1>Cambridge Units</h1>
+        <div class="unit-grid" id="unitGridContainer">
+            <!-- Units will be generated by JS -->
+        </div>
+    </div>
 
     <div id="contentPage" class="fade" style="display: none;">
+        <button class="back-btn" id="contentBackBtn">Back</button>
         <h1 id="pageTitle"></h1>
         <div class="word-container" id="wordContainer"></div>
     </div>
 
     <script>
+        // Page elements
+        const pages = {
+            preStart: document.getElementById('preStartPage'),
+            start: document.getElementById('startPage'),
+            cambridge: document.getElementById('cambridgePage'),
+            content: document.getElementById('contentPage')
+        };
+
+        // Main buttons
+        const discoBtn = document.getElementById('discoBtn');
+        const cambridgeBtn = document.getElementById('cambridgeBtn');
         const wordDefinitionsBtn = document.getElementById('wordDefinitionsBtn');
         const discoStoriesBtn = document.getElementById('discoStoriesBtn');
-        const startPage = document.getElementById('startPage');
-        const contentPage = document.getElementById('contentPage');
+        
+        // Content elements
+        const unitGridContainer = document.getElementById('unitGridContainer');
         const wordContainer = document.getElementById('wordContainer');
         const pageTitle = document.getElementById('pageTitle');
+        const contentBackBtn = document.getElementById('contentBackBtn');
+
+        let lastPageBeforeContent = 'preStart'; // To track where to go back to
 
         const fileUrls = {
             wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
-            discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx"
+            discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx",
+            cambridgeBaseUrl: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/"
         };
+        
+        // --- Navigation Logic ---
+        function showPage(pageId) {
+            Object.values(pages).forEach(page => page.style.display = 'none');
+            pages[pageId].style.display = 'flex';
+            if (pageId === 'content') pages[pageId].style.display = 'block';
+        }
 
-        // وقتی دکمه Word Definitions کلیک می‌شود
+        discoBtn.addEventListener('click', () => {
+            lastPageBeforeContent = 'start';
+            showPage('start');
+        });
+        
+        cambridgeBtn.addEventListener('click', () => {
+            lastPageBeforeContent = 'cambridge';
+            showPage('cambridge');
+        });
+
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetPageId = e.target.dataset.target;
+                if (targetPageId) {
+                    showPage(targetPageId);
+                }
+            });
+        });
+
+        contentBackBtn.addEventListener('click', () => {
+            showPage(lastPageBeforeContent);
+        });
+
+        // --- Data Loading Logic ---
         wordDefinitionsBtn.addEventListener("click", function() {
             loadPage("Word Definitions", fileUrls.wordDefinitions);
         });
 
-        // وقتی دکمه Disco Stories کلیک می‌شود
         discoStoriesBtn.addEventListener("click", function() {
             loadPage("Disco Stories", fileUrls.discoStories);
         });
+        
+        function generateCambridgeUnits() {
+            for (let i = 1; i <= 22; i++) {
+                const unitBtn = document.createElement('button');
+                unitBtn.className = 'unit-option';
+                unitBtn.textContent = `Unit ${i}`;
+                unitBtn.addEventListener('click', () => {
+                    const fileUrl = `${fileUrls.cambridgeBaseUrl}Unit_${i}.xlsx`;
+                    loadPage(`Unit ${i}`, fileUrl);
+                });
+                unitGridContainer.appendChild(unitBtn);
+            }
+        }
 
-        // بارگذاری صفحه و داده‌ها
         function loadPage(pageName, fileUrl) {
-            startPage.style.display = "none";
-            contentPage.style.display = "block";
+            showPage('content');
             pageTitle.textContent = pageName;
             loadExcelData(fileUrl);
         }
 
-        // بارگذاری فایل اکسل
         function loadExcelData(fileUrl) {
+            wordContainer.innerHTML = "<h1>Loading...</h1>"; // Loading indicator
             fetch(fileUrl)
-                .then(response => response.arrayBuffer())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`File not found or network error (${response.status})`);
+                    }
+                    return response.arrayBuffer();
+                })
                 .then(data => {
                     const workbook = XLSX.read(data, { type: "array" });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-                    wordContainer.innerHTML = ""; // پاک کردن داده‌های قبلی
+                    wordContainer.innerHTML = ""; // Clear previous data
 
-                    rows.forEach(row => {
-                        if (row.length >= 2) {
-                            const word = row[0].trim();
-                            const definition = row[1].trim();
+                    rows.forEach((row, index) => {
+                        if (row && row.length >= 2) {
+                            const word = row[0] ? String(row[0]).trim() : '';
+                            const definition = row[1] ? String(row[1]).trim() : '';
 
-                            const wordElement = document.createElement("div");
-                            wordElement.classList.add("word");
-                            wordElement.textContent = word;
-                            
-                            const definitionElement = document.createElement("div");
-                            definitionElement.classList.add("definition");
-                            definitionElement.textContent = definition;
+                            if (word && definition) {
+                                const wordElement = document.createElement("div");
+                                wordElement.classList.add("word");
+                                wordElement.textContent = word;
+                                wordElement.style.animationDelay = `${index * 0.05}s`; // Staggered animation
 
-                            wordElement.addEventListener("click", function() {
-                                if (definitionElement.style.display === "none" || definitionElement.style.display === "") {
-                                    definitionElement.style.display = "block";
-                                } else {
-                                    definitionElement.style.display = "none";
-                                }
-                            });
+                                const definitionElement = document.createElement("div");
+                                definitionElement.classList.add("definition");
+                                definitionElement.innerHTML = definition.replace(/\n/g, '<br>'); // Support newlines
 
-                            wordContainer.appendChild(wordElement);
-                            wordContainer.appendChild(definitionElement);
+                                wordElement.addEventListener("click", function() {
+                                    const isHidden = definitionElement.style.display === "none" || definitionElement.style.display === "";
+                                    definitionElement.style.display = isHidden ? "block" : "none";
+                                });
+
+                                wordContainer.appendChild(wordElement);
+                                wordContainer.appendChild(definitionElement);
+                            }
                         }
                     });
                 })
                 .catch(error => {
                     console.error("Error loading Excel file:", error);
+                    wordContainer.innerHTML = `<h1>Error</h1><p>Could not load the data from the specified file. Please check the file URL and your network connection.</p><p><em>${error.message}</em></p>`;
                 });
         }
+        
+        // Initialize the app
+        generateCambridgeUnits();
+        showPage('preStart');
+
     </script>
 
 </body>
