@@ -1,111 +1,322 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Definitions</title>
+<title>Word Definitions — Fixed</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-    body {
-        font-family: "Times New Roman", serif;
+    /* Layout & base */
+    html, body {
+        height: 100%;
         margin: 0;
         padding: 0;
-        background-color: #080808;
+    }
+    body {
+        font-family: "Times New Roman", serif;
+        background-color: #0b0b0d; /* slightly darker background */
         color: #f5f5f5;
         opacity: 0;
-        animation: fadeIn 1s ease-in forwards;
+        animation: fadeIn 0.9s ease-in forwards;
         position: relative;
-        overflow-x: hidden;
-    }
+        /* remove overflow:hidden so pages can scroll */
+        overflow: auto;
+    }@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
 
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
+/* Animated Background */
+.background-blurs {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+}
+.blur-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.36;
+}
+/* soft noise */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAARlJREFUaIHt1M0NwjAUBlAb6Cg6gI7gGjlCB3AFHdABdBRHcAR0AFUoRAxJ/158fUmKZH6S/N329gQAgG83AAB/xYBSAAAAYQlIAABYSJAAAACwECQBAAAWEiQAAACsBEgAAFgIkQAAALASIIE/YUECBDaCAgQ2igIEPsICBD6CAgQ+igIE/oYFCGwEBQhsFAUI/AwLEPgMCxD4DAoQ+BkWIHATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQgsBEUILA5FAAAgF8CegB75sHyJpAAAAAElFTkSuQmCC');
+    opacity: 0.08;
+    z-index: -1;
+    pointer-events: none;
+}
 
-    .background-blurs {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -2;
-        overflow: hidden;
-    }
-    .blur-circle {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(140px);
-        opacity: 0.38;
-    }
+@keyframes move-circle1 {
+    0% {transform: translate(-20%, -20%) scale(1);} 
+    100% {transform: translate(80%, 60%) scale(1.2);} 
+}
+@keyframes move-circle2 {
+    0% {transform: translate(70%, 20%) scale(1);} 
+    100% {transform: translate(-30%, -40%) scale(0.8);} 
+}
+@keyframes move-circle3 {
+    0% {transform: translate(20%, 70%) scale(0.9);} 
+    100% {transform: translate(60%, -50%) scale(1.1);} 
+}
 
-    body::after {
-        content: "";
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAARlJREFUaIHt1M0NwjAUBlAb6Cg6gI7gGjlCB3AFHdABdBRHcAR0AFUoRAxJ/158fUmKZH6S/N329gQAgG83AAB/xYBSAAAAYQlIAABYSJAAAACwECQBAAAWEiQAAACsBEgAAFgIkQAAALASIIE/YUECBDaCAgQ2igIEPsICBD6CAgQ+igIE/oYFCGwEBQhsFAUI/AwLEPgMCxD4DAoQ+BkWIHATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQgsBEUILA5FAAAgF8CegB75sHyJpAAAAAElFTkSuQmCC');
-        opacity: 0.08;
-        z-index: -1;
-    }
+/* Pages */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+    box-sizing: border-box;
+    width: 100%;
+}
 
-    @keyframes move-circle1 {
-        0% {transform: translate(-20%, -20%) scale(1);}
-        100% {transform: translate(80%, 60%) scale(1.2);}
-    }
-    @keyframes move-circle2 {
-        0% {transform: translate(70%, 20%) scale(1);}
-        100% {transform: translate(-30%, -40%) scale(0.8);}
-    }
-    @keyframes move-circle3 {
-        0% {transform: translate(20%, 70%) scale(0.9);}
-        100% {transform: translate(60%, -50%) scale(1.1);}
-    }
+/* make pages that need scrolling explicitly scrollable */
+.page-container.scrollable {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
+}
 
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 40px;
-        box-sizing: border-box;
-        width: 100%;
-    }
+/* Buttons */
+.start-option {
+    font-family: "Times New Roman", serif;
+    font-size: 26px;
+    font-weight: bold;
+    margin: 12px 0;
+    padding: 18px 36px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    transition: background-color 0.3s, transform 0.2s;
+    width: 300px;
+    text-align: center;
+}
+.start-option:hover { transform: scale(1.03); background-color: rgba(255,255,255,0.1);} 
 
-    .scrollable {
-        justify-content: flex-start;
-    }
+.unit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    width: 80%;
+    max-width: 900px;
+    margin-top: 20px;
+}
+.unit-option { font-size: 16px; padding: 15px; cursor: pointer; background-color: rgba(255,255,255,0.06); color:white; border-radius:8px; border:1px solid rgba(255,255,255,0.06);} 
+.unit-option:hover { transform: scale(1.05); background-color: rgba(255,255,255,0.1);} 
 
-    .start-option {
-        font-family: "Times New Roman", serif;
-        font-size: 26px;
-        font-weight: bold;
-        margin: 12px 0;
-        padding: 18px 36px;
-        cursor: pointer;
-        background-color: rgba(255, 255, 255, 0.08);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        transition: background-color 0.3s, transform 0.2s;
-        width: 300px;
-    }
-    .start-option:hover {
-        background-color: rgba(255, 255, 255, 0.18);
-        transform: scale(1.03);
-    }
+.word-container { display:flex; flex-direction:column; align-items:center; margin-top:20px; width:100%; max-width:980px; }
+.word { font-size:20px; font-weight:bold; cursor:pointer; margin:8px 0; opacity:0; transform: translateY(10px); animation: fadeWord 0.6s ease-in-out forwards; }
+@keyframes fadeWord { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+.definition { font-size:18px; font-style:italic; color:#ccc; display:none; margin-top:4px; max-width:90%; line-height:1.5; }
 
-    .unit-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 15px;
-        width: 80%;
-        max-width: 800px;
-        margin-top: 20px;
-        margin-bottom: 40px;
+h1 { font-size:40px; margin-bottom:20px; }
+
+.back-btn { position: absolute; top: 18px; left: 18px; font-size:16px; padding:8px 14px; background-color: rgba(255,255,255,0.06); color:white; border-radius:8px; border:1px solid rgba(255,255,255,0.06); cursor:pointer; }
+.back-btn:hover { background-color: rgba(255,255,255,0.1);} 
+
+/* small screens adjustments */
+@media (max-width:600px){ .start-option { width: 90%; } .unit-grid { width: 95%; } }
+
+</style>
+</head>
+<body><div class="background-blurs" aria-hidden="true">
+    <div class="blur-circle circle1"></div>
+    <div class="blur-circle circle2"></div>
+    <div class="blur-circle circle3"></div>
+</div><div id="preStartPage" class="page-container">
+    <button class="start-option" id="discoBtn">Disco</button>
+    <button class="start-option" id="cambridgeBtn">Cambridge</button>
+</div><div id="startPage" class="page-container" style="display:none;">
+    <!-- data-target values are normalized to the internal page keys -->
+    <button class="back-btn" data-target="preStart">Back</button>
+    <div style="width:100%; display:flex; flex-direction:column; align-items:center; margin-top:80px;">
+        <button class="start-option" id="wordDefinitionsBtn">Word Definitions</button>
+        <button class="start-option" id="discoStoriesBtn">Disco Stories</button>
+    </div>
+</div><div id="cambridgePage" class="page-container scrollable" style="display:none;">
+    <button class="back-btn" data-target="preStart">Back</button>
+    <h1>Cambridge Units</h1>
+    <div class="unit-grid" id="unitGridContainer"></div>
+</div><div id="contentPage" class="page-container" style="display:none;">
+    <button class="back-btn" id="contentBackBtn">Back</button>
+    <h1 id="pageTitle"></h1>
+    <div class="word-container" id="wordContainer"></div>
+</div><script>
+// Page references
+const pages = {
+    preStart: document.getElementById('preStartPage'),
+    start: document.getElementById('startPage'),
+    cambridge: document.getElementById('cambridgePage'),
+    content: document.getElementById('contentPage')
+};
+
+const discoBtn = document.getElementById('discoBtn');
+const cambridgeBtn = document.getElementById('cambridgeBtn');
+const wordDefinitionsBtn = document.getElementById('wordDefinitionsBtn');
+const discoStoriesBtn = document.getElementById('discoStoriesBtn');
+const unitGridContainer = document.getElementById('unitGridContainer');
+const wordContainer = document.getElementById('wordContainer');
+const pageTitle = document.getElementById('pageTitle');
+const contentBackBtn = document.getElementById('contentBackBtn');
+
+let lastPageBeforeContent = 'preStart';
+
+const fileUrls = {
+    wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
+    discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx",
+    cambridgeBaseUrl: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/"
+};
+
+// show/hide pages (flex by default)
+function showPage(pageId){
+    if(!pages[pageId]) return; // safety
+    Object.values(pages).forEach(p=> p.style.display='none');
+    // ensure the shown page uses flex layout
+    pages[pageId].style.display = 'flex';
+    // if this page should be scrollable, add the class (idempotent)
+    if(pageId === 'cambridge') pages[pageId].classList.add('scrollable');
+}
+
+// Normalize data-target values: accept 'preStartPage' or 'preStart' to be robust
+function normalizeTarget(target){
+    if(!target) return null;
+    if(pages[target]) return target;
+    // allow values like 'preStartPage' or 'contentPage' by stripping trailing 'Page'
+    if(target.endsWith('Page')){
+        const key = target.replace(/Page$/,'');
+        if(pages[key]) return key;
     }
-    .unit-option {
-        font-size: 16px;
+    return null;
+}
+
+// Generic back button handler for buttons that have data-target
+document.querySelectorAll('.back-btn').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+        // try dataset.target first (if present and normalized)
+        const targetAttr = e.currentTarget.dataset.target;
+        const normalized = normalizeTarget(targetAttr);
+        if(normalized){
+            showPage(normalized);
+            return;
+        }
+        // if no data-target, but this is the content page back button, use lastPageBeforeContent
+        if(e.currentTarget.id === 'contentBackBtn'){
+            showPage(lastPageBeforeContent || 'preStart');
+            return;
+        }
+    });
+});
+
+// separate handler in case some code calls contentBackBtn directly
+contentBackBtn.addEventListener('click', ()=>{
+    showPage(lastPageBeforeContent || 'preStart');
+});
+
+// Cambridge Units generator
+function generateCambridgeUnits(){
+    unitGridContainer.innerHTML = '';
+    for(let i=1;i<=22;i++){
+        const unitBtn = document.createElement('button');
+        unitBtn.className='unit-option';
+        unitBtn.textContent=`Unit ${i}`;
+        unitBtn.addEventListener('click',()=>{
+            lastPageBeforeContent = 'cambridge';
+            const fileUrl = `${fileUrls.cambridgeBaseUrl}Unit_${i}.xlsx`;
+            loadPage(`Unit ${i}`, fileUrl);
+        });
+        unitGridContainer.appendChild(unitBtn);
+    }
+}
+
+// Load Page
+wordDefinitionsBtn && wordDefinitionsBtn.addEventListener('click',()=>{
+    lastPageBeforeContent = 'start';
+    loadPage("Word Definitions", fileUrls.wordDefinitions);
+});
+
+discoStoriesBtn && discoStoriesBtn.addEventListener('click',()=>{
+    lastPageBeforeContent = 'start';
+    loadPage("Disco Stories", fileUrls.discoStories);
+});
+
+function loadPage(name, url){
+    showPage('content');
+    pageTitle.textContent = name;
+    loadExcelData(url);
+}
+
+function loadExcelData(fileUrl){
+    wordContainer.innerHTML = "<h2>Loading...</h2>";
+    fetch(fileUrl).then(res=>{
+        if(!res.ok) throw new Error(`Error ${res.status}`);
+        return res.arrayBuffer();
+    }).then(data=>{
+        const workbook = XLSX.read(data,{type:'array'});
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(firstSheet,{header:1});
+        wordContainer.innerHTML = '';
+        rows.forEach((row,index)=>{
+            if(row && row.length >= 2){
+                const word = String(row[0] || '').trim();
+                const def = String(row[1] || '').trim();
+                if(word && def){
+                    const wEl = document.createElement('div');
+                    wEl.className = 'word';
+                    wEl.textContent = word;
+                    wEl.style.animationDelay = `${index * 0.02}s`;
+                    const dEl = document.createElement('div');
+                    dEl.className = 'definition';
+                    dEl.innerHTML = def.replace(/\n/g,'<br>');
+                    wEl.addEventListener('click', ()=>{
+                        dEl.style.display = (dEl.style.display === 'block') ? 'none' : 'block';
+                    });
+                    wordContainer.appendChild(wEl);
+                    wordContainer.appendChild(dEl);
+                }
+            }
+        });
+        // if no rows found
+        if(!wordContainer.children.length) wordContainer.innerHTML = '<p>No data found in the sheet.</p>';
+    }).catch(err=>{
+        wordContainer.innerHTML = `<h2>Error</h2><p>${err.message}</p>`;
+    });
+}
+
+// Random colors for background circles
+function setRandomCircleColors(){
+    const palettes = [
+        ["#ff4d4d","#ff944d","#ffd24d"],
+        ["#4dafff","#4d94ff","#4dd2ff"],
+        ["#bb4dff","#944dff","#d24dff"],
+        ["#4dff88","#4dffc2","#4dfff5"]
+    ];
+    const palette = palettes[Math.floor(Math.random()*palettes.length)];
+    const circles = document.querySelectorAll('.blur-circle');
+    if(!circles || !circles.length) return;
+    circles[0].style.background = palette[0];
+    circles[1].style.background = palette[1];
+    circles[2].style.background = palette[2];
+    circles[0].style.width = '600px'; circles[0].style.height = '600px';
+    circles[1].style.width = '500px'; circles[1].style.height = '500px';
+    circles[2].style.width = '420px'; circles[2].style.height = '420px';
+    circles[0].style.animation = 'move-circle1 28s infinite alternate';
+    circles[1].style.animation = 'move-circle2 34s infinite alternate';
+    circles[2].style.animation = 'move-circle3 22s infinite alternate';
+}
+
+// Init
+generateCambridgeUnits();
+showPage('preStart');
+setRandomCircleColors();
+</script></body>
+</html>        font-size: 16px;
         padding: 15px;
         cursor: pointer;
         background-color: rgba(255, 255, 255, 0.1);
@@ -1050,6 +1261,7 @@ setRandomCircleColors();
 
 </body>
 </html>
+
 
 
 
