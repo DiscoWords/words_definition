@@ -1,111 +1,155 @@
 <!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Definitions — Fixed</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-    /* Layout & base */
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Definitions</title>
+  <style>
     body {
-        font-family: "Times New Roman", serif;
-        background-color: #0b0b0d; /* slightly darker background */
-        color: #f5f5f5;
-        opacity: 0;
-        animation: fadeIn 0.9s ease-in forwards;
-        position: relative;
-        /* remove overflow:hidden so pages can scroll */
-        overflow: auto;
-    }@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-
-/* Animated Background */
-.background-blurs {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    overflow: hidden;
-    pointer-events: none;
-}
-.blur-circle {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(140px);
-    opacity: 0.36;
-}
-/* soft noise */
-body::after {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAARlJREFUaIHt1M0NwjAUBlAb6Cg6gI7gGjlCB3AFHdABdBRHcAR0AFUoRAxJ/158fUmKZH6S/N329gQAgG83AAB/xYBSAAAAYQlIAABYSJAAAACwECQBAAAWEiQAAACsBEgAAFgIkQAAALASIIE/YUECBDaCAgQ2igIEPsICBD6CAgQ+igIE/oYFCGwEBQhsFAUI/AwLEPgMCxD4DAoQ+BkWIHATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQg8BMUIPATFCDwExQgsBEUILA5FAAAgF8CegB75sHyJpAAAAAElFTkSuQmCC');
-    opacity: 0.08;
-    z-index: -1;
-    pointer-events: none;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0b0d;
+      color: #f2f2f2;
+      overflow-y: auto;
+    }.page-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-@keyframes move-circle1 {
-    0% {transform: translate(-20%, -20%) scale(1);} 
-    100% {transform: translate(80%, 60%) scale(1.2);} 
-}
-@keyframes move-circle2 {
-    0% {transform: translate(70%, 20%) scale(1);} 
-    100% {transform: translate(-30%, -40%) scale(0.8);} 
-}
-@keyframes move-circle3 {
-    0% {transform: translate(20%, 70%) scale(0.9);} 
-    100% {transform: translate(60%, -50%) scale(1.1);} 
+.page-container.active {
+  display: flex;
 }
 
-/* Pages */
-.page-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 100vh;
-    padding: 40px;
-    box-sizing: border-box;
-    width: 100%;
+h1, h2, h3 {
+  margin: 10px 0;
+  text-align: center;
 }
 
-/* make pages that need scrolling explicitly scrollable */
-.page-container.scrollable {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    align-items: center;
+button {
+  background: #1a1a1f;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 10px 16px;
+  margin: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button:hover {
+  background: #333;
 }
 
-/* Buttons */
-.start-option {
-    font-family: "Times New Roman", serif;
-    font-size: 26px;
-    font-weight: bold;
-    margin: 12px 0;
-    padding: 18px 36px;
-    cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.06);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    transition: background-color 0.3s, transform 0.2s;
-    width: 300px;
-    text-align: center;
+.back-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #222;
+  border: 1px solid #555;
+  z-index: 999;
 }
-.start-option:hover { transform: scale(1.03); background-color: rgba(255,255,255,0.1);} 
 
-.unit-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-    width: 80%;
-    max-width: 900px;
+.word-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 600px;
+}
+
+.word-list li {
+  background: #1a1a1f;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid #333;
+}
+.word-list li:hover {
+  background: #2a2a2f;
+}
+
+.definition {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #151518;
+  border: 1px solid #333;
+  max-width: 700px;
+}
+
+.scrollable {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+  </style>
+</head>
+<body>
+  <!-- Start Page -->
+  <div id="startPage" class="page-container active">
+    <h1>Word Definitions</h1>
+    <button data-target="cambridgePage">Cambridge Words</button>
+    <button data-target="oxfordPage">Oxford Words</button>
+  </div>  <!-- Cambridge Page -->  <div id="cambridgePage" class="page-container scrollable">
+    <button class="back-btn" data-target="startPage">Back</button>
+    <h2>Cambridge Dictionary</h2>
+    <ul class="word-list">
+      <li data-word="abandon">abandon</li>
+      <li data-word="abstract">abstract</li>
+      <li data-word="access">access</li>
+    </ul>
+  </div>  <!-- Oxford Page -->  <div id="oxfordPage" class="page-container scrollable">
+    <button class="back-btn" data-target="startPage">Back</button>
+    <h2>Oxford Dictionary</h2>
+    <ul class="word-list">
+      <li data-word="benevolent">benevolent</li>
+      <li data-word="candid">candid</li>
+      <li data-word="diligent">diligent</li>
+    </ul>
+  </div>  <!-- Word Content Page -->  <div id="contentPage" class="page-container">
+    <button class="back-btn" id="backToList">Back</button>
+    <h2 id="wordTitle">Word</h2>
+    <div class="definition" id="wordDefinition">Definition will appear here...</div>
+  </div>  <script>
+    const pages = document.querySelectorAll('.page-container');
+    const buttons = document.querySelectorAll('button[data-target]');
+    let lastPageBeforeContent = 'startPage';
+
+    function showPage(id) {
+      pages.forEach(p => p.classList.remove('active'));
+      const page = document.getElementById(id);
+      if (page) page.classList.add('active');
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        let target = btn.getAttribute('data-target');
+        if (target === 'preStartPage') target = 'startPage';
+        showPage(target);
+      });
+    });
+
+    const wordLists = document.querySelectorAll('.word-list li');
+    wordLists.forEach(item => {
+      item.addEventListener('click', () => {
+        lastPageBeforeContent = item.closest('.page-container').id;
+        document.getElementById('wordTitle').innerText = item.dataset.word;
+        document.getElementById('wordDefinition').innerText = `Definition of ${item.dataset.word}...`;
+        showPage('contentPage');
+      });
+    });
+
+    document.getElementById('backToList').addEventListener('click', () => {
+      showPage(lastPageBeforeContent);
+    });
+  </script></body>
+</html>    max-width: 900px;
     margin-top: 20px;
 }
 .unit-option { font-size: 16px; padding: 15px; cursor: pointer; background-color: rgba(255,255,255,0.06); color:white; border-radius:8px; border:1px solid rgba(255,255,255,0.06);} 
@@ -1261,6 +1305,7 @@ setRandomCircleColors();
 
 </body>
 </html>
+
 
 
 
