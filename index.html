@@ -15,7 +15,7 @@
         opacity: 0;
         animation: fadeIn 1s ease-in forwards;
         position: relative;
-        overflow: hidden;
+        overflow: hidden; /* Prevent body scroll */
     }
 
     @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
@@ -33,9 +33,8 @@
         position: absolute;
         border-radius: 50%;
         filter: blur(140px);
-        opacity: 0.4;
+        opacity: 0.25; /* کاهش شفافیت برای تیره‌تر شدن */
     }
-    /* نویز ملایم */
     body::after {
         content: "";
         position: fixed;
@@ -61,15 +60,20 @@
 
     /* Pages */
     .page-container {
-        display: flex;
+        display: none; /* Hide all pages by default */
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
+        height: 100vh;
         padding: 40px;
         box-sizing: border-box;
     }
-    .scrollable {
+    .page-container.active {
+        display: flex; /* Show only the active page */
+    }
+    /* ** FIX FOR SCROLLING ** */
+    .page-container.scrollable {
+        justify-content: flex-start; /* Align to top to allow scrolling */
         overflow-y: auto;
     }
 
@@ -87,6 +91,7 @@
         border-radius: 12px;
         transition: background-color 0.3s, transform 0.2s;
         width: 300px;
+        text-align: center;
     }
     .start-option:hover {
         background-color: rgba(255, 255, 255, 0.2);
@@ -97,7 +102,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 15px;
-        width: 80%;
+        width: 100%;
         max-width: 800px;
         margin-top: 20px;
     }
@@ -121,7 +126,8 @@
         flex-direction: column;
         align-items: center;
         margin-top: 20px;
-        max-height: 80vh;
+        width: 100%;
+        max-height: 80vh; /* Limits height to allow scrolling within container */
         overflow-y: auto;
         padding: 0 20px;
     }
@@ -148,13 +154,14 @@
         max-width: 80%;
         line-height: 1.5;
         animation: fadeInDefinition 0.3s ease-in-out;
+        text-align: center;
     }
     @keyframes fadeInDefinition {
         from {opacity: 0; transform: translateY(-5px);}
         to {opacity: 1; transform: translateY(0);}
     }
 
-    h1 {font-size: 40px; margin-bottom: 30px;}
+    h1 {font-size: 40px; margin-bottom: 30px; text-align: center;}
 
     .back-btn {
         position: absolute;
@@ -168,6 +175,7 @@
         border-radius: 8px;
         cursor: pointer;
         transition: background-color 0.3s;
+        z-index: 10;
     }
     .back-btn:hover {
         background-color: rgba(255, 255, 255, 0.2);
@@ -182,36 +190,165 @@
     <div class="blur-circle circle3"></div>
 </div>
 
-<div id="preStartPage" class="page-container">
-    <button class="start-option" id="discoBtn">Disco</button>
-    <button class="start-option" id="cambridgeBtn">Cambridge</button>
+<div id="preStartPage" class="page-container active">
+    <button class="start-option" data-target="startPage">Disco</button>
+    <button class="start-option" data-target="cambridgePage">Cambridge</button>
 </div>
 
-<div id="startPage" class="page-container" style="display: none;">
+<div id="startPage" class="page-container">
     <button class="back-btn" data-target="preStartPage">Back</button>
     <button class="start-option" id="wordDefinitionsBtn">Word Definitions</button>
     <button class="start-option" id="discoStoriesBtn">Disco Stories</button>
 </div>
 
-<div id="cambridgePage" class="page-container scrollable" style="display: none;">
+<div id="cambridgePage" class="page-container scrollable">
     <button class="back-btn" data-target="preStartPage">Back</button>
     <h1>Cambridge Units</h1>
     <div class="unit-grid" id="unitGridContainer"></div>
 </div>
 
-<div id="contentPage" class="page-container" style="display: none;">
+<div id="contentPage" class="page-container">
     <button class="back-btn" id="contentBackBtn">Back</button>
     <h1 id="pageTitle"></h1>
     <div class="word-container" id="wordContainer"></div>
 </div>
 
 <script>
-const pages = {
-    preStart: document.getElementById('preStartPage'),
-    start: document.getElementById('startPage'),
-    cambridge: document.getElementById('cambridgePage'),
-    content: document.getElementById('contentPage')
-};
+document.addEventListener('DOMContentLoaded', () => {
+    const pages = {
+        preStartPage: document.getElementById('preStartPage'),
+        startPage: document.getElementById('startPage'),
+        cambridgePage: document.getElementById('cambridgePage'),
+        contentPage: document.getElementById('contentPage')
+    };
+
+    const wordContainer = document.getElementById('wordContainer');
+    const pageTitle = document.getElementById('pageTitle');
+    const contentBackBtn = document.getElementById('contentBackBtn');
+
+    const fileUrls = {
+        wordDefinitions: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/longman_definitions.xlsx",
+        discoStories: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/Notes_Disco.xlsx",
+        cambridgeBaseUrl: "https://raw.githubusercontent.com/DiscoWords/words_definition/refs/heads/main/"
+    };
+
+    // ** ROBUST NAVIGATION LOGIC **
+    function showPage(pageId) {
+        Object.values(pages).forEach(p => p.classList.remove('active'));
+        if (pages[pageId]) {
+            pages[pageId].classList.add('active');
+        }
+    }
+    
+    // Generic button click handler for navigation
+    document.body.addEventListener('click', (e) => {
+        const targetPage = e.target.dataset.target;
+        if (targetPage && pages[targetPage]) {
+            showPage(targetPage);
+        }
+    });
+    
+    // Cambridge Units Generation
+    function generateCambridgeUnits() {
+        const unitGridContainer = document.getElementById('unitGridContainer');
+        for (let i = 1; i <= 22; i++) {
+            const unitBtn = document.createElement('button');
+            unitBtn.className = 'unit-option';
+            unitBtn.textContent = `Unit ${i}`;
+            unitBtn.addEventListener('click', () => {
+                const fileUrl = `${fileUrls.cambridgeBaseUrl}Unit_${i}.xlsx`;
+                loadContentPage(`Unit ${i}`, fileUrl, 'cambridgePage');
+            });
+            unitGridContainer.appendChild(unitBtn);
+        }
+    }
+
+    // Specific button event listeners
+    document.getElementById('wordDefinitionsBtn').addEventListener('click', () => {
+        loadContentPage("Word Definitions", fileUrls.wordDefinitions, 'startPage');
+    });
+
+    document.getElementById('discoStoriesBtn').addEventListener('click', () => {
+        loadContentPage("Disco Stories", fileUrls.discoStories, 'startPage');
+    });
+
+
+    function loadContentPage(name, url, fromPage) {
+        showPage('contentPage');
+        contentBackBtn.dataset.target = fromPage; // ** FIX FOR BACK BUTTON **
+        pageTitle.textContent = name;
+        loadExcelData(url);
+    }
+
+    function loadExcelData(fileUrl) {
+        wordContainer.innerHTML = "<h1>Loading...</h1>";
+        fetch(fileUrl)
+            .then(res => {
+                if (!res.ok) throw new Error(`Network response was not ok: ${res.statusText}`);
+                return res.arrayBuffer();
+            })
+            .then(data => {
+                const workbook = XLSX.read(data, { type: "array" });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                wordContainer.innerHTML = "";
+                rows.forEach((row, index) => {
+                    if (row && row.length >= 2) {
+                        const word = String(row[0] || "").trim();
+                        const def = String(row[1] || "").trim();
+                        if (word && def) {
+                            const wEl = document.createElement("div");
+                            wEl.className = "word";
+                            wEl.textContent = word;
+                            wEl.style.animationDelay = `${index * 0.05}s`;
+                            
+                            const dEl = document.createElement("div");
+                            dEl.className = "definition";
+                            dEl.innerHTML = def.replace(/\n/g, "<br>");
+
+                            wEl.addEventListener("click", () => {
+                                dEl.style.display = (dEl.style.display === "none" || !dEl.style.display) ? "block" : "none";
+                            });
+                            
+                            wordContainer.appendChild(wEl);
+                            wordContainer.appendChild(dEl);
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Fetch Error:', err);
+                wordContainer.innerHTML = `<h1>Error Loading Data</h1><p>${err.message}</p>`;
+            });
+    }
+
+    // Random colors for background circles
+    function setRandomCircleColors() {
+        const palettes = [
+            ["#ff4d4d", "#ff944d", "#ffd24d"], ["#4dafff", "#4d94ff", "#4dd2ff"],
+            ["#bb4dff", "#944dff", "#d24dff"], ["#4dff88", "#4dffc2", "#4dfff5"]
+        ];
+        const palette = palettes[Math.floor(Math.random() * palettes.length)];
+        const circles = document.querySelectorAll('.blur-circle');
+        circles[0].style.background = palette[0];
+        circles[1].style.background = palette[1];
+        circles[2].style.background = palette[2];
+        circles[0].style.width = "600px"; circles[0].style.height = "600px";
+        circles[1].style.width = "500px"; circles[1].style.height = "500px";
+        circles[2].style.width = "400px"; circles[2].style.height = "400px";
+        circles[0].style.animation = "move-circle1 25s infinite alternate ease-in-out";
+        circles[1].style.animation = "move-circle2 30s infinite alternate ease-in-out";
+        circles[2].style.animation = "move-circle3 20s infinite alternate ease-in-out";
+    }
+
+    // Initialize the app
+    generateCambridgeUnits();
+    setRandomCircleColors();
+    showPage('preStartPage'); // Start on the preStart page
+});
+</script>
+</body>
+</html>
 
 const discoBtn = document.getElementById('discoBtn');
 const cambridgeBtn = document.getElementById('cambridgeBtn');
@@ -643,4 +780,5 @@ setRandomCircleColors();
 
 </body>
 </html>
+
 
